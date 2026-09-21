@@ -31,7 +31,7 @@ import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignReques
 
 @Slf4j
 @DisplayName("AWS S3 테스트")
-@Tag("asw-integration") // 일반 테스트와 분리하기 위해 태그 지정
+@Tag("aws-integration") // 일반 테스트와 분리하기 위해 태그 지정
 public class AWSS3Test {
 
   private static S3Client s3Client;
