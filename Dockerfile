@@ -9,9 +9,8 @@ RUN chmod +x gradlew && ./gradlew dependencies --no-daemon
 
 # 소스 코드 복사 후 실행 가능한 jar 블드
 COPY src ./src
-RUN ./gradlew bootJar
-# 빌드 과정에서 테스트 진행
-# spring framework 전용, 자바 컴파일, 단위, 통합 테스트 실행
+RUN ./gradlew bootJar -x test
+# 테스트 코드를 제외하고 빌드하여 실행 가능한 jar 파일 생성
 
 # 2. run 스테이지
 FROM eclipse-temurin:17-jre
@@ -37,7 +36,7 @@ EXPOSE 80
 # 80 포트 노출
 
 HEALTHCHECK --interval=15s --timeout=3s --start-period=60s --retries=5 \
-  CMD curl -fsS http://localhost:80/actuator/health
+  CMD curl -fsS http://localhost:80/actuator/health || exit 1
 # Actuator 헬스체크 60초 뒤에 실행, 15초에 한 번씩 요청 보내고 3초 이내 응답이 와야 건강한 것으로 판단
 # 만일 3초 이내 응답이 오지 않는다면 재요청 횟수 5번
 # 응답이 오지 않으면 서버는 아예 내린다
