@@ -1,4 +1,9 @@
+.git
+.github
 .gitignore
+.env
+.env.*
+discodeit.env
 .idea
 *.iml
 build/
