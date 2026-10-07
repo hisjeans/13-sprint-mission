@@ -10,6 +10,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import java.util.Objects;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -65,7 +66,7 @@ public class User extends BaseUpdatableEntity {
       this.password = newPassword;
       anyValueUpdated = true;
     }
-    if (!newProfile.equals(this.profile)) { // 프로필은 선택적으로 등록 가능하기 때문에 null로 변경 가능
+    if (newProfile != null && !Objects.equals(newProfile, profile)) { // 새로운 프로필이 전달되면 프로필 수정
       this.profile = newProfile;
       anyValueUpdated = true;
     }

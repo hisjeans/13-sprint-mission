@@ -104,7 +104,8 @@ public class BasicUserService implements UserService {
       log.warn("이미 사용 중인 사용자 이메일 {}", newEmail);
       throw new UserAlreadyExistsException("중복된 email", newEmail);
     }
-    if (userRepository.existsByUsername(newUsername)) {
+    if (userRepository.existsByUsername(newUsername) && !user.getUsername()
+        .equals(newUsername)) {
       log.warn("이미 존재하는 사용자 이름 {}", newUsername);
       throw new UserAlreadyExistsException("중복된 username", newUsername);
     }
@@ -123,7 +124,7 @@ public class BasicUserService implements UserService {
     // 기존 프로필 삭제
     user.update(newUsername, newEmail, userUpdateRequest.getNewPassword(), profile); // profileId 추가
     log.info("사용자 정보 수정 userId={}, newUserName={}, newEmail={}, fileName={}", userId,
-        newUsername, newEmail, profile.getFileName());
+        newUsername, newEmail, profile != null ? profile.getFileName() : null);
     return userMapper.toDto(user);
   }
 
