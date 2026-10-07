@@ -4,6 +4,8 @@ name: ci
 
 # 트리거: 언제 이 워크플로우를 실행할지 정의
 on:
+  push:
+    branches: [ "최진희-sprint8" ]
   pull_request:
     branches: [ "main" ] # main 브랜치로 PR이 생성될 때 실행
   workflow_dispatch: # 수동으로 실행 가능 (Actions 탭에서 직접 "Run workflow" 버튼 클릭)
