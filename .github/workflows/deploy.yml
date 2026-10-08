@@ -13,7 +13,8 @@ permissions:
   contents: read # 코드 체크아웃
 
 env:
-  AWS_REGION: ${{ vars.AWS_REGION }}
+  ECS_AWS_REGION: ${{ vars.AWS_REGION }}
+  ECR_PUBLIC_REGION: us-east-1
   ECR_REPOSITORY_URI: ${{ vars.ECR_REPOSITORY_URI }}
   ECS_CLUSTER: ${{ vars.ECS_CLUSTER }}
   ECS_SERVICE: ${{ vars.ECS_SERVICE }}
@@ -46,11 +47,11 @@ jobs:
       - name: 코드 체크아웃
         uses: actions/checkout@v7
 
-      - name: AWS 자격증명
+      - name: AWS 자격증명 (Public ECR)
         uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }} # GitHub Actions가 맡을 IAM 역할 ARN
-          aws-region: us-east-1
+          aws-region: ${{ env.ECR_PUBLIC_REGION }}
 
       - name: Public ECR 로그인
         uses: aws-actions/amazon-ecr-login@v2
@@ -75,15 +76,16 @@ jobs:
           # 다음 단계에서 ECS 서비스에 배포할 때, 어떤 이미지 태그를 사용할지 출력 -> GITHUB_OUTPUT에 저장
           echo "image=$ECR_REPOSITORY_URI:$IMAGE_TAG" >> "$GITHUB_OUTPUT"
 
-      - name: AWS 자격증명
+      - name: AWS 자격증명 (ECS)
         uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }} # GitHub Actions가 맡을 IAM 역할 ARN
-          aws-region: ${{ env.AWS_REGION }}
+          aws-region: ${{ env.ECS_AWS_REGION }}
 
       - name: 현재 작업 정의(task definition) 내려받기
         run: |
           aws ecs describe-task-definition \
+          --region "$ECS_AWS_REGION" \
           --task-definition "$ECS_TASK_DEFINITION" \
           --query "taskDefinition" > task-definition.json
           
@@ -110,11 +112,13 @@ jobs:
       - name: 기존 ECS 서비스 중단
         run: |
           aws ecs update-service \
+            --region "$ECS_AWS_REGION" \
             --cluster "$ECS_CLUSTER" \
             --service "$ECS_SERVICE" \
             --desired-count 0
 
           aws ecs wait services-stable \
+            --region "$ECS_AWS_REGION" \
             --cluster "$ECS_CLUSTER" \
             --services "$ECS_SERVICE"
 
